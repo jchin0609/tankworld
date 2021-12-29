@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
+		<script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script> 
+		<script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
+
+		<script>
+			AFRAME.registerComponent("shoot", {
+				schema: {
+			        time: {type: 'number', default: 50}
+			    },
+		        init: function() {
+		          	this.ticks = 0;
+        			this.lifetime = this.data.time;
+
+        			var bullet = document.querySelector("#bullet");
+        			
+			
+		        },
+		        tick: function() {
+		          var bullet = document.querySelector("#bullet");
+		          var direction = new THREE.Vector3();
+		          this.el.object3D.getWorldDirection(direction);
+		          direction.multiplyScalar(0.5);
+		          var pos = bullet.getAttribute("position");
+		          pos.add(direction);
+		          bullet.setAttribute("position", pos);
+
+		          this.lifetime--;
+		          if(this.lifetime === 0){
+			         
+			          this.el.sceneEl.removeChild(this.el);
+			      }
+		        }
+		      });
+			  
+			  AFRAME.registerComponent("movetank", {
+			    init: function() {
+			     
+			      var player = document.querySelector("#mytank");
+			      
+			      var direction = new THREE.Vector3();
+			      
+			      window.addEventListener("keydown", (e) => {
+			  
+			        if (e.code === "KeyW") {
+			          this.el.object3D.getWorldDirection(direction);
+
+			          direction.multiplyScalar(-0.1);
+			          console.log(direction);
+			        
+			          var pos = player.getAttribute("position");
+
+			          pos.add(direction);
+
+			          player.setAttribute("position", pos);
+
+			        }
+			        else if (e.code === "KeyS")
+			        {
+			        	this.el.object3D.getWorldDirection(direction);
+	
+			          direction.multiplyScalar(+0.1);
+			          console.log(direction);
+			        
+			          var pos = player.getAttribute("position");
+			          
+			          pos.add(direction);
+			          
+			          player.setAttribute("position", pos);
+
+			        }
+			        else if (e.code === "KeyD")
+			        {
+			        	this.el.object3D.rotation.y-=0.1;			        	
+			        }
+			        else if (e.code === "KeyA")
+			        {
+			        	this.el.object3D.rotation.y+=0.1;
+			        }
+			       
+			      	if (e.code === "KeyQ")
+			        {
+			        	var entityEl = document.createElement('a-entity');
+			        	entityEl.setAttribute('id',"bullet");
+						entityEl.setAttribute('geometry', 'primitive: sphere; width: 3');
+						entityEl.setAttribute('position', { x : -0.020 , y : 1.176 , z : -1.613 });
+						entityEl.setAttribute('rotation', { x : 0 , y : 180 , z : 0 });
+						entityEl.setAttribute('scale', { x : 0.06 , y : 0.06 , z : 0.06});
+						
+						entityEl.setAttribute("ammo-body", {
+				          type: "kinematic",
+				          emitCollisionEvents: "true"
+				        });
+
+
+						entityEl.setAttribute("ammo-shape", {
+				          type: "sphere"
+
+				        });
+
+						entityEl.setAttribute('shoot',"");
+						this.el.sceneEl.appendChild(entityEl);
+			        }
+			      
+
+			      })
+			    }
+			  });
+			  console.log(document.querySelector('a-assets').fileLoader);
+
+		</script>
+		     
+
+		<title>坦克期末</title>
+	</head>
+	<body>
+		<a-scene inspector="https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js" physics="driver: ammo; debug: true; gravity: -9.8; debugDrawMode: 1">
+
+			<a-assets>
+				<img id="myimage" src="LogPic7.png">
+    		<a-asset-item id="tank-obj" src="tank/Tiger_I.obj"></a-asset-item>
+    		<a-asset-item id="tank-mtl" src="tank/Tiger_I.mtl"></a-asset-item>
+    		
+      
+            </a-assets> 
+
+            <a-image src="#myimage"><a-image>
+
+			<a-entity id="mytank" movetank>
+				<a-entity obj-model="obj:#tank-obj;mtl:#tank-mtl"  position="0 0 0" rotation="0 180 0" scale="0.006 0.006 0.006" ></a-entity>
+					<a-entity camera position="0 2.9 0" rotation="0 0 0">
+						
+					</a-entity>
+				</a-entity>
+			</a-entity>
+			
+
+			<!-- environment -->
+			<a-entity environment="preset:default" ammo-body="type: static; mass: 0;" ammo-shape></a-entity> 
+			<a-entity environment="preset:default" ammo-body="type: static; mass: 0;" ammo-shape></a-entity> 
+			
+		</a-scene>
+	</body>
+	</html>	
